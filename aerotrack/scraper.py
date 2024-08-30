@@ -90,10 +90,12 @@ def scrape_registration_data(tail_number):
 def scrape_flight_history(tail_number):
     flight_history_url = f"https://www.flightaware.com/live/flight/{tail_number}/history"
     
+    # Header HTTP
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     
+    # Mengambil data dari URL
     flight_history_response = requests.get(flight_history_url, headers=headers)
     
     if flight_history_response.status_code != 200:
@@ -102,20 +104,26 @@ def scrape_flight_history(tail_number):
     
     flight_soup = BeautifulSoup(flight_history_response.text, 'html.parser')
     
+    # Mengambil elemen yang benar berdasarkan class
     flight_rows = flight_soup.find_all('tr', class_='smallActiverow1')
     print("\n\033[1mFlight History\033[0m")
 
     if flight_rows:
-        print(f"{'Date':<15} {'Departure':<15} {'Arrival':<15} {'Aircraft':<10} {'Duration':<10}")
-        print("-" * 68)
+        # Tampilkan judul dengan warna putih
+        print(f"{'Date':<15} {'Departure':<40} {'Arrival':<40} {'Aircraft':<10} {'Duration':<10}")
+        print("-" * 117)
         for row in flight_rows:
             columns = row.find_all('td')
             if len(columns) == 7:
                 date = columns[0].get_text(strip=True)
-                departure = columns[4].get_text(strip=True)
-                arrival = columns[5].get_text(strip=True)
+                departure_airport = columns[2].find('span', itemprop='name').get_text(strip=True)
+                departure_time = columns[4].get_text(strip=True).strip()
+                departure_info = f"{departure_airport} {departure_time}"
+                arrival_airport = columns[3].find('span', itemprop='name').get_text(strip=True)
+                arrival_time = columns[5].get_text(strip=True).strip()
+                arrival_info = f"{arrival_airport} {arrival_time}"
                 aircraft = columns[1].get_text(strip=True)
                 duration = columns[6].get_text(strip=True)
-                print(f"\033[94m{date:<15} {departure:<15} {arrival:<15} {aircraft:<10} {duration:<10}\033[0m")
+                print(f"\033[94m{date:<15} {departure_info:<40} {arrival_info:<40} {aircraft:<10} {duration:<10}\033[0m")
     else:
         print("Flight history not found.")
