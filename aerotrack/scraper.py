@@ -4,11 +4,13 @@ from bs4 import BeautifulSoup
 def scrape_registration_data(tail_number):
     flightaware_url = f"https://www.flightaware.com/resources/registration/{tail_number}"
     faa_url = f"https://registry.faa.gov/AircraftInquiry/Search/NNumberResult?nNumberTxt={tail_number}"
+    jetphotos_url = f"https://www.jetphotos.com/registration/{tail_number}"
     
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     
+    # Scrape data from FlightAware
     flightaware_response = requests.get(flightaware_url, headers=headers)
     if flightaware_response.status_code != 200:
         print(f"Failed to retrieve data from {flightaware_url}")
@@ -38,6 +40,7 @@ def scrape_registration_data(tail_number):
         
         data[title] = f"\033[94m{value}\033[0m"
     
+    # Scrape data from FAA
     faa_response = requests.get(faa_url, headers=headers)
     if faa_response.status_code != 200:
         print(f"Failed to retrieve data from {faa_url}")
@@ -56,6 +59,13 @@ def scrape_registration_data(tail_number):
         model_value = model_name.find_next_sibling('td').get_text(strip=True)
         data['Model'] = f"\033[94m{model_value}\033[0m"
 
+    # New code to get Aircraft Type
+    aircraft_type = faa_soup.find('td', string="Type Aircraft")
+    if aircraft_type:
+        aircraft_type_value = aircraft_type.find_next_sibling('td').get_text(strip=True)
+        data['Aircraft Type'] = f"\033[94m{aircraft_type_value}\033[0m"
+
+    # Address fields
     address_keys = ["Street", "City", "State", "County", "Zip Code", "Country"]
     for key in address_keys:
         address_element = faa_soup.find('td', string=key)
@@ -63,6 +73,7 @@ def scrape_registration_data(tail_number):
             address_value = address_element.find_next_sibling('td').get_text(strip=True)
             data[key] = f"\033[94m{address_value}\033[0m"
 
+    # Print Aircraft Information
     if not data:
         print(f"\n\033[1mAircraft Information for {tail_number}\033[0m")
         print("Aircraft information not found.")
@@ -70,7 +81,30 @@ def scrape_registration_data(tail_number):
         print(f"\n\033[1mAircraft Information for {tail_number}\033[0m")
         for key, value in data.items():
             print(f"{key}: {value}")
-    
+
+    # Scrape data from JetPhotos for all image URLs
+    jetphotos_response = requests.get(jetphotos_url, headers=headers)
+    image_urls = []
+    if jetphotos_response.status_code == 200:
+        jetphotos_soup = BeautifulSoup(jetphotos_response.text, 'html.parser')
+        image_sections = jetphotos_soup.find_all('div', class_='result__section result__section--photo-wrapper')
+        
+        for image_section in image_sections:
+            image_tag = image_section.find('img', class_='result__photo')
+            if image_tag:
+                image_url = "https:" + image_tag['src']
+                image_urls.append(image_url)
+    else:
+        print("Failed to retrieve image data from JetPhotos.")
+
+    # Display Aircraft Images after Aircraft Information
+    print("\n\033[1mAircraft Images\033[0m")
+    if image_urls:
+        for url in image_urls:
+            print(f"Image URL: \033[94m{url}\033[0m")  # Light blue color for image URLs
+    else:
+        print("Image URLs: Not found.")
+
     print("\n\033[1mRegistration History\033[0m")
     history_rows = soup.find_all('tr', class_=['row1', 'row2'])
     
