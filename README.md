@@ -3,6 +3,8 @@ This OSINT (Open Source Intelligence) tool is designed to simplify the process o
 ownership details, aircraft creation dates, and expiration dates. By leveraging data from sources like FlightAware and FAA, this tool supports aviation investigations and research by offering a clear and 
 formatted presentation of crucial aircraft registration details.
 
+This repository is inspired by [ANG13T](https://github.com/ANG13T/skytrack/).
+
 ## USAGE 
 ```bash
 $ git clone https://github.com/dika-maulidal/aerotrack.git
