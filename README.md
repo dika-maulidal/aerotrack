@@ -20,8 +20,7 @@ $ python main.py
 - And Others.
 
 ## Preview
-![aircraft_tracker](https://github.com/user-attachments/assets/cc67fac0-fc47-4861-ada5-be2ce3b0c481)
-
+![aircraftimages](https://github.com/user-attachments/assets/a1ad61bc-9b92-4aa2-bbaf-35991ff6ada5)
 
 ## Key Feutures
 - Retrieve ICAO codes, owner information, and registration dates.
@@ -32,3 +31,5 @@ $ python main.py
 - [FlightAware](https://www.flightaware.com/)
 
 - [FAA](https://registry.faa.gov/AircraftInquiry/)
+
+- [JetPhotos](https://www.jetphotos.com/)
